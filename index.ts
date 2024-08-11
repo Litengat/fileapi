@@ -107,7 +107,7 @@ function getDir(pathname: string[]): Response {
         Files: out,
     }), {headers: {"Content-Type": "application/json"}})
 }
-function getFileURL(pathname: string[]): Response {//#endregion
+function getFileURL(pathname: string[]): Response {
     var path = "/" + pathname.slice(2).join("/")
     if(!fs.existsSync(path)){
         return new Response("404!", {headers: {"Content-Type": "application/test"}})
