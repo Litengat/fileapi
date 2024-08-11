@@ -36,6 +36,9 @@ function file(pathname: string[]): Response {
     case "getfile": {
       return getFile(pathname);
     }
+    case "deletefile": {
+      return deleteFile(pathname);
+    }
   }
   return new Response("404!", {
     headers: { "Content-Type": "application/text" },
@@ -82,6 +85,7 @@ function getDir(pathname: string[]): Response {
     { headers: { "Content-Type": "application/json" } }
   );
 }
+
 function getFileURL(pathname: string[]): Response {
   var path = "/" + pathname.slice(2).join("/");
   if (!fs.existsSync(path)) {
@@ -106,10 +110,7 @@ function getFileURL(pathname: string[]): Response {
 }
 
 function getFile(pathname: string[]): Response {
-  const replaceAll = pathname[2].replaceAll("-", "/");
-  const path = cryptojs.AES.decrypt(replaceAll, pass).toString(
-    cryptojs.enc.Utf8
-  );
+  const path = pathname[2].replaceAll("-", "/");
   if (!fs.existsSync(path)) {
     return new Response("404!", {
       headers: { "Content-Type": "application/test" },
@@ -123,6 +124,7 @@ function getFile(pathname: string[]): Response {
     headers: { "Content-Type": "application/text" },
   });
 }
+
 function deleteFile(pathname: string[]): Response {
   const replaceAll = pathname[2].replaceAll("-", "/");
   const path = cryptojs.AES.decrypt(replaceAll, pass).toString(
