@@ -46,11 +46,8 @@ function file(pathname: string[]): Response {
 }
 
 function getDir(pathname: string[]): Response {
-  var path = "/" + pathname.slice(2).join("/");
+  var path = "~/" + pathname.slice(2).join("/");
   const out: FileData[] = [];
-  if (path === "") {
-    path = "/Users/";
-  }
   if (!fs.existsSync(path)) {
     return new Response("404!", {
       headers: { "Content-Type": "application/text" },
@@ -87,7 +84,7 @@ function getDir(pathname: string[]): Response {
 }
 
 function getFileURL(pathname: string[]): Response {
-  var path = "/" + pathname.slice(2).join("/");
+  var path = "~/" + pathname.slice(2).join("/");
   if (!fs.existsSync(path)) {
     return new Response("404!", {
       headers: { "Content-Type": "application/test" },
