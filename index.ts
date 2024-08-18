@@ -40,7 +40,7 @@ function file(pathname: string[]): Response {
       return deleteFile(pathname);
     }
   }
-  return new Response("404!", {
+  return new Response("404! para", {
     headers: { "Content-Type": "application/text" },
   });
 }
@@ -50,7 +50,7 @@ function getDir(pathname: string[]): Response {
   console.log(path);
   const out: FileData[] = [];
   if (!fs.existsSync(path)) {
-    return new Response("404!", {
+    return new Response("404! Dir path", {
       headers: { "Content-Type": "application/text" },
     });
   }
@@ -87,7 +87,7 @@ function getDir(pathname: string[]): Response {
 function getFileURL(pathname: string[]): Response {
   var path = "/" + pathname.slice(2).join("/");
   if (!fs.existsSync(path)) {
-    return new Response("404!", {
+    return new Response("404! file not found", {
       headers: { "Content-Type": "application/test" },
     });
   }
@@ -108,9 +108,12 @@ function getFileURL(pathname: string[]): Response {
 }
 
 function getFile(pathname: string[]): Response {
-  const path = pathname[2].replaceAll("-", "/");
+  const replaceAll = pathname[2].replaceAll("-", "/");
+  const path = cryptojs.AES.decrypt(replaceAll, pass).toString(
+    cryptojs.enc.Utf8
+  );
   if (!fs.existsSync(path)) {
-    return new Response("404!", {
+    return new Response("404! file not found", {
       headers: { "Content-Type": "application/test" },
     });
   }
@@ -124,10 +127,7 @@ function getFile(pathname: string[]): Response {
 }
 
 function deleteFile(pathname: string[]): Response {
-  const replaceAll = pathname[2].replaceAll("-", "/");
-  const path = cryptojs.AES.decrypt(replaceAll, pass).toString(
-    cryptojs.enc.Utf8
-  );
+  var path = "/" + pathname.slice(2).join("/");
   if (!fs.existsSync(path)) {
     return new Response("404!", {
       headers: { "Content-Type": "application/test" },
