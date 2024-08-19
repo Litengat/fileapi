@@ -2,26 +2,36 @@ import fs from "fs";
 import cryptojs from "crypto-js";
 import crypto from "crypto";
 import { FileData, FileType } from "./File";
-import { BunFile } from "bun";
 import { zipFolder, compressSingleFile, zipmultiple } from "./zip";
 
-const domain = "http://localhost:3010";
+const domain = Bun.env.SERVER_URL;
 
 const pass = crypto.randomBytes(16).toString("hex");
 
+console.log(domain);
+
 Bun.serve({
-  port: 3010,
+  port: Bun.env.SERVER_PORT,
   fetch(req) {
-    var res = new Response("404!");
+    const key = req.headers.get("server_secret");
+    var res = new Response("404! ");
     const url = new URL(req.url);
     const pathname = url.pathname.split("/").filter((x) => x != "");
     switch (pathname[0]) {
       case "file":
-        res = file(pathname);
+        if (key === Bun.env.SERVER_SECRET) {
+          res = file(pathname);
+        }
         break;
+      case "download":
+        res = getFile(pathname[1]);
     }
     res.headers.set("Access-Control-Allow-Origin", "*");
     return res;
+  },
+  tls: {
+    cert: Bun.file("cert.pem"),
+    key: Bun.file("key.pem"),
   },
 });
 
@@ -34,7 +44,10 @@ function file(pathname: string[]): Response {
       return getFileURL(pathname);
     }
     case "getfile": {
-      return getFile(pathname);
+      return getFile(pathname[2]);
+    }
+    case "getfiledata": {
+      return getFileData(pathname);
     }
     case "deletefile": {
       return deleteFile(pathname);
@@ -84,6 +97,22 @@ function getDir(pathname: string[]): Response {
   );
 }
 
+function getFileData(pathname: string[]): Response {
+  var path = "/" + pathname.slice(2).join("/");
+  const filestats = fs.statSync(path);
+  const fileData: FileData = {
+    name: pathname[pathname.length - 1],
+    size: filestats.size,
+    type: filestats.isDirectory() ? FileType.Folder : FileType.File,
+    lastModified: filestats.mtime.getTime(),
+    created: filestats.birthtime.getTime(),
+    path: path + "/" + file,
+  };
+  return new Response(JSON.stringify(fileData), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 function getFileURL(pathname: string[]): Response {
   var path = "/" + pathname.slice(2).join("/");
   if (!fs.existsSync(path)) {
@@ -102,13 +131,13 @@ function getFileURL(pathname: string[]): Response {
     cryptojs.enc.Utf8
   ).toString();
   const replaceAll = encrypted.replaceAll("/", "-");
-  return new Response(domain + "/file/getfile/" + replaceAll, {
+  return new Response(domain + "/download/" + replaceAll, {
     headers: { "Content-Type": "application/text" },
   });
 }
 
-function getFile(pathname: string[]): Response {
-  const replaceAll = pathname[2].replaceAll("-", "/");
+function getFile(pathname: string): Response {
+  const replaceAll = pathname.replaceAll("-", "/");
   const path = cryptojs.AES.decrypt(replaceAll, pass).toString(
     cryptojs.enc.Utf8
   );
