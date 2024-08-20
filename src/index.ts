@@ -30,8 +30,8 @@ Bun.serve({
     return res;
   },
   tls: {
-    cert: Bun.file("cert.pem"),
-    key: Bun.file("key.pem"),
+    cert: Bun.file("cert/cert.pem"),
+    key: Bun.file("cert/key.pem"),
   },
 });
 
