@@ -131,7 +131,7 @@ function getFileURL(pathname: string[]): Response {
     cryptojs.enc.Utf8
   ).toString();
   const replaceAll = encrypted.replaceAll("/", "-");
-  return new Response(domain + "/download/" + replaceAll, {
+  return new Response("/download/" + replaceAll, {
     headers: { "Content-Type": "application/text" },
   });
 }

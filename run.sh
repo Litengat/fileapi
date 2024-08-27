@@ -5,3 +5,5 @@ docker run --privileged -d \
     --env-file ./.env \
     -p 443:443 \
     litengut/fileapi fileapi‹
+
+docker ps -a 
