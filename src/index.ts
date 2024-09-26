@@ -16,7 +16,9 @@ Bun.serve({
     const key = req.headers.get("server_secret");
     var res = new Response("404! ");
     const url = new URL(req.url);
-    const pathname = url.pathname.split("/").filter((x) => x != "");
+    const pathname = decodeURI(url.pathname)
+      .split("/")
+      .filter((x) => x != "");
     switch (pathname[0]) {
       case "file":
         if (key === Bun.env.SERVER_SECRET) {
@@ -49,7 +51,7 @@ function file(pathname: string[]): Response {
     case "getfiledata": {
       return getFileData(pathname);
     }
-    case "deletefile": {
+    case "delfile": {
       return deleteFile(pathname);
     }
   }
@@ -60,7 +62,6 @@ function file(pathname: string[]): Response {
 
 function getDir(pathname: string[]): Response {
   var path = "/" + pathname.slice(2).join("/");
-  console.log(path);
   const out: FileData[] = [];
   if (!fs.existsSync(path)) {
     return new Response("404! Dir path", {
@@ -151,7 +152,7 @@ function getFile(pathname: string): Response {
     fs.rmSync(path);
   }
   return new Response(file, {
-    headers: { "Content-Type": "application/text" },
+    headers: { "Content-Type": "application/stream" },
   });
 }
 
@@ -159,7 +160,7 @@ function deleteFile(pathname: string[]): Response {
   var path = "/" + pathname.slice(2).join("/");
   if (!fs.existsSync(path)) {
     return new Response("404!", {
-      headers: { "Content-Type": "application/test" },
+      headers: { "Content-Type": "application/text" },
     });
   }
   fs.rmSync(path);
